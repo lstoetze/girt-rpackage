@@ -4,4 +4,6 @@ Implementation of MCMC algorithm for model of article ("Whose dimension is it an
 
 # File Description
 
-__MCMCirtG__ main function runs MCMC algorithm to estimate the joint scaling model of the article.
+__MCMCirtG.R__ main r function to call the MCMC algorithm to estimate the joint scaling model of the article.
+
+__IRTRcpp.cpp__ RcppArmadillo code for the MCMC sampler.
