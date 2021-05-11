@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1599123479824.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "D284012B",
+    "lastKnownWriteTime" : 1599138380,
+    "last_content_update" : 1599138380377,
+    "path" : "~/Documents/Projekte/00_published/2021_SpatialBeliefs/Manuscript/src/calc/fun/girt-package/src/MCMC_update_steps.h",
+    "project_path" : "src/MCMC_update_steps.h",
+    "properties" : {
+        "cursorPosition" : "13,37",
+        "scrollLine" : "0"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "h"
+}

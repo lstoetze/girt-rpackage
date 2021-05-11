@@ -1,0 +1,20 @@
+{
+    "collab_server" : "",
+    "contents" : "#' ---\n#' title: \"Whose Dimension is it anyway: CCES Legislator and Citzins Scaling\"\n#' author: \"Lukas F. Stoetzer\"\n#' ---\n\n#' Script estimates irt models for Senator Representation Study\n\n  # Libraries\n  library(pscl)\n\n  # Set values for mcmc\n  sample <- 120000\n  burnin <- 2000\n  thinin <- 100\n\n  # Start Time\n  start.time <- Sys.time()\n  \n# 1) Prepare Data  =========\n\n  # Load SRS Study (Downloaded from Dataverse https://doi.org/10.7910/DVN/IIYGGX)\n  load(\"in/Formatted+info+votes+matrices.RData\")\n  load(\"in/Survey+Responses+Dataframe.Rdata\")\n  \n  # Starting Values to assure converagence\n  init_sen  <- ifelse(sen.all.raw$party.x==200, 1, -1) # set republican start value at 1; democrat -1\n  init_sen[is.na(init_sen)] <- 0\n  init_resp <- ifelse(survey.wd$pid == 7, 1, \n                      ifelse(survey.wd$pid== 1, -1, 0)) # set strong republican start value at 1; strong democrat -1; others 0\n  init_resp[is.na(init_resp)] <- 0\n  \n# 2) Legislators & Respondent scaling ======\n\n  # Legsilator Based Scaling\n   leg_srs <- ideal(rollcall(VOTES.SEN.SMALL), \n                    maxiter=sample, thin=thinin, burnin=burnin,\n                    normalize=T,\n                    startvals=list(x= init_sen),\n                    store.item=TRUE)\n  \n  # Legsilator Based Scaling\n   resp_srs <- ideal(rollcall(VOTES.RESP.SMALL), \n                     maxiter=sample, thin=thinin, burnin=burnin,\n                     normalize=T,\n                     startvals=list(x= init_resp),\n                     store.item=TRUE)\n\n# 4) Post-Estimation ========= \n\n  # Save\n    save(leg_srs,resp_srs,file=\"out/smpl/res_srs_scaling.Rdata\")\n  \n    rm(leg_srs,resp_srs)\n\n    # Time Track\n    end.time <- Sys.time()\n    time.taken <- end.time - start.time\n    print(time.taken)\n    ",
+    "created" : 1562160928819.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "300973178",
+    "id" : "D431E176",
+    "lastKnownWriteTime" : 1562168215,
+    "last_content_update" : 1562168215634,
+    "path" : "~/Documents/Projekte/02_inprep/SpatialBeliefs/Manuscript/JointScal/src/calc/01_SRS_Scaling.R",
+    "project_path" : null,
+    "properties" : {
+    },
+    "relative_order" : 10,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

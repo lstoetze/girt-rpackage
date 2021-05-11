@@ -1,0 +1,56 @@
+#' ---
+#' title: "Whose Dimension is it anyway: Utilities"
+#' author: "Lukas F. Stoetzer"
+#' ---
+
+#' Script contains utils function
+#' 
+
+# function to make tracplot
+plot_trace <- function(res, what="gamma"){
+  df <- melt(res[[what]])
+  ggplot(df) +
+    geom_line(aes(x=Var1,y=value,col=factor(Var3))) +
+    facet_wrap(~Var2,scales="free") +
+    geom_hline(yintercept = 0,col="red",alpha=0.3)
+}
+
+# Function to plot CI's
+plot_ci <- function(res, what="gamma"){
+  df_ci  <- data.frame(t(apply(res[[what]][,,c(1,2,4)],2,quantile,c(0.05,0.1,0.5,0.9,0.95))))
+  names(df_ci) <- c("low","low2","mid","high2","high")
+  df_ci$par <- paste(what,1:nrow(df_ci))
+  
+  ggplot(df_ci) +
+    geom_pointrange(aes(x=par,y=mid,ymin=low,ymax=high)) +
+    coord_flip()  
+  
+}
+
+# Function to rotate chains
+post_est_rotate <- function(res, 
+                            which.beta.neg=1, 
+                            which.par=c("beta","theta_leg","theta_cit")){
+  
+  # See which chains need to be rotated
+  chains_turn <- which(apply(res$beta[,1,],2,mean)>0)
+  
+  # Rotate beta, and theta_leg and theta_cit
+  for(k in which.par)   res[[k]][,,chains_turn] <- -1*res[[k]][,,chains_turn]
+  
+  # Return Rotated Samples
+  return(res)
+  
+}
+
+
+# Bind Chians rowwise togther
+rbind_array <- function(aray) do.call("rbind",lapply(seq(dim(aray)[3]), function(x) aray[ , , x]))
+
+# For complete object
+combine_chains <- function(res){
+  lapply(res,function(obj) if(is.array(obj)) {rbind_array(obj)} else {obj})
+} 
+
+
+  

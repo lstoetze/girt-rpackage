@@ -1,0 +1,9 @@
+
+## optional
+## CXX_STD = CXX11
+
+PKG_CXXFLAGS = $(SHLIB_OPENMP_CXXFLAGS) 
+PKG_LIBS = $(SHLIB_OPENMP_CFLAGS) $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS) 
+PKG_CXXFLAGS += -Wall -pedantic -g -ggdb #-fno-inline-small-functions 
+PKG_LIBS +=  -lprofiler
+CXX_STD = CXX11

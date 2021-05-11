@@ -1,0 +1,4 @@
+useDynLib(girt)
+import(Rcpp)
+importFrom(Rcpp)
+exportPattern("^[[:alpha:]]+")

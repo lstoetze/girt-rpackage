@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1572609792085.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "6985A333",
+    "lastKnownWriteTime" : 1599138935,
+    "last_content_update" : 1599138935687,
+    "path" : "~/Documents/Projekte/00_published/2021_SpatialBeliefs/Manuscript/src/calc/fun/girt-package/src/IRTRcpp.cpp",
+    "project_path" : "src/IRTRcpp.cpp",
+    "properties" : {
+        "cursorPosition" : "493,10",
+        "scrollLine" : "0"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "cpp"
+}

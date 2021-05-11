@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "model{\n  \n  for(i in 1:N){ over inividuals\n    \n    # Outcome model mean w. measurment error\n    y[i,] ~ dmnorm(mu[i,],V) \n    \n    # Calcualte expectd values from bliefs\n    mu[i,1] <- qbeta(0.25,a[i],b[i])\n    mu[i,3] <- qbeta(0.5 ,a[i],b[i])\n    mu[i,4] <- qbeta(0.75,a[i],b[i])\n    \n    # Hiearical Prior for shape paramter\n    a[i] ~ dlnorm(mu.a, w.a)\n    b[i] ~ dlnorm(mu.b, w.b)\n    \n  }\n  \n  # Priors on measrument Variance\n  for(k in 1:3){\n      v[k] ~ dunif(0,1)\n  }\n  V <- diag(v[1:3])\n  \n  # Priors on Hyper-paramters\n  mu.a ~ dunif(0,1000)\n  mu.b ~ dunif(0,1000)\n  \n  # Priors on Variance terms\n  w.a ~ dunif(0,1000)\n  w.b ~ dunif(0,1000)\n\n}",
+    "created" : 1562323751691.000,
+    "dirty" : true,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2755276308",
+    "id" : "242B8FAC",
+    "lastKnownWriteTime" : 1562324611,
+    "last_content_update" : 1562325316575,
+    "path" : "~/Documents/Projekte/02_inprep/Eliciting_Priors/Analysis Research Note/fun/bayes_model_quantiles.jags",
+    "project_path" : null,
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 4,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "text"
+}

@@ -1,0 +1,269 @@
+#' ---
+#' title: "Whose Dimension is it anyway: CCES Legislator and Citzins Scaling"
+#' author: "Lukas F. Stoetzer"
+#' ---
+
+#' Script estimates irt models for CCES Study
+
+  # Libraries
+  library(girt)
+  library(tidyverse)
+  library(reshape2)
+  source("fun/utilits.R")
+  
+  # Set values for mcmc
+  Niter <- 5000
+  Nburin <- 1000
+  Nthin <- 50
+  Nchains <- 4
+
+  # Start Time
+  start.time <- Sys.time()
+  
+# 1) CCES 08 ================
+  
+  # Script
+    cat("\n Estimaing Model for CCES 2008 \n")
+  
+  # Load Data
+   load("in/cces2008_rollvote.Rdata")
+  
+  # Legislator Data
+    rvs <- paste("rv",c(1:9),sep="")
+    ld <- as.matrix(rbind(sen110[,rvs],hou110[,rvs]))
+    
+  # Respondent Data
+    resp <- cces2008[,grep("rv|polint_news|pid",colnames(cces2008))]
+    s <- apply(resp[,grep("polint_news|pid",colnames(resp))],1,function(x) !any(is.na(x)))
+    resp_subset <- resp[s,]
+    d <-  resp_subset# [sample(1:nrow(resp_subset),1000),]
+    rd <- as.matrix(d[,1:9])
+  
+  # Missing Values
+    d %>% 
+      mutate(interest = ifelse(polint_news==4,1,0),
+             partisan = ifelse(pid %in% c(1,2,6,7),1,0)
+             ) %>% 
+      group_by(interest,partisan) %>%
+      gather(rv,val,-interest,-partisan) %>%
+      summarise(mean(is.na(val))) 
+                  
+    
+  # Covariates
+    interest <- ifelse(d[,"polint_news"] ==4,1,0)  # Exposure to public news
+    partisan <- ifelse(d[,"pid"] %in% c(1,2,6,7),1,0) # Party identification
+    democrat <- ifelse(d[,"pid"] %in% c(1,2),1,0) # Democrats Party identification
+    republican <- ifelse(d[,"pid"] %in% c(6,7),1,0) # Republican Party identification
+    
+  # Estimating Model
+    cat("\n First Model \n")
+    Z <- model.matrix(~ 1 +  partisan + interest)
+    res_2008_m1 <- MCMCirtG(Yl = ld,Yc = rd, X = Z,
+                         burnin=Nburin,gibbs = Niter,thin = Nthin,
+                         chains=Nchains,
+                         prior_var_gamma = 100, proposal_var = 0.009)
+
+    plot_trace(res_2008_m1) 
+  # Estimating Model
+    cat("\n Second Model \n")
+    Z <- model.matrix(~ partisan*interest)
+    res_2008_m2 <- MCMCirtG(Yl = ld,Yc = rd, X = Z,
+                            burnin=Nburin,gibbs = Niter,thin = Nthin,
+                            chains=Nchains,
+                            prior_var_gamma = 100, proposal_var = 0.009)
+ 
+    
+  # Estimating Model
+    cat("\n Third Model \n")
+    Z <- model.matrix(~ democrat + republican + interest + interest:democrat +interest:republican)
+    res_2008_m3 <- MCMCirtG(Yl = ld,Yc = rd, X = Z,
+                            burnin=Nburin,gibbs = Niter,thin = Nthin,
+                            chains=Nchains,
+                            prior_var_gamma = 100, proposal_var = 0.009)
+    
+  # Save Results
+    save(res_2008_m1, res_2008_m2, res_2008_m3,file="out/smpl/cces2008_girt_models.Rdata")
+    rm(res_2008_m1, res_2008_m2, res_2008_m3)
+  
+# 2) CCES 10 ========================
+  
+  # Script
+    cat("\n Estimaing Model for CCES 2010 \n")
+    
+  # Load Data
+    load("in/cces2010_rollvote.Rdata")
+    
+  # Legislator Data
+    rvs <- paste("rv",c(1:4,6:10),sep="")
+    ld <- as.matrix(rbind(sen111[,rvs],hou111[,rvs]))
+    
+  # Respondent Data
+    resp <- cces2010[,grep("rv|polint_news|pid",colnames(cces2010))]
+    s <- apply(resp[,grep("polint_news|pid",colnames(resp))],1,function(x) !any(is.na(x)))
+    resp_subset <- resp[s,]
+    d <-  resp_subset[sample(1:nrow(resp_subset),2000),]
+    rd <- as.matrix(d[,1:9])
+    
+  # Missing Values
+    d %>% 
+      mutate(interest = ifelse(polint_news==4,1,0),
+             partisan = ifelse(pid %in% c(1,2,6,7),1,0)
+      ) %>% 
+      group_by(interest,partisan) %>%
+      gather(rv,val,-interest,-partisan) %>%
+      summarise(mean(is.na(val))) 
+    
+  # Covariates
+    interest <- ifelse(d[,"polint_news"] ==4,1,0)  # Exposure to public news
+    partisan <- ifelse(d[,"pid"] %in% c(1,2,6,7),1,0) # Party identification
+    democrat <- ifelse(d[,"pid"] %in% c(1,2),1,0) # Democrats Party identification
+    republican <- ifelse(d[,"pid"] %in% c(6,7),1,0) # Republican Party identification
+    
+  # Estimating Model
+    cat("\n First Model \n")
+    Z <- model.matrix(~ partisan + interest)
+    res_2010_m1 <- MCMCirtG(Yl = ld,Yc = rd, X = Z,
+                            burnin=Nburin,gibbs = Niter,thin = Nthin,
+                            chains=Nchains,
+                            prior_var_gamma = 100, proposal_var = 0.009)
+    
+  # Estimating Model
+    cat("\n Second Model \n")
+    Z <- model.matrix(~ partisan*interest)
+    res_2010_m2 <- MCMCirtG(Yl = ld,Yc = rd, X = Z,
+                            burnin=Nburin,gibbs = Niter,thin = Nthin,
+                            chains=Nchains,
+                            prior_var_gamma = 100, proposal_var = 0.009)
+    
+  # Estimating Model
+    cat("\n Third Model \n")
+    Z <- model.matrix(~ democrat + republican + interest + interest:democrat +interest:republican)
+    res_2010_m3 <- MCMCirtG(Yl = ld,Yc = rd, X = Z,
+                            burnin=Nburin,gibbs = Niter,thin = Nthin,
+                            chains=Nchains,
+                            prior_var_gamma = 100, proposal_var = 0.009)
+    
+  # Save Results
+    save(res_2010_m1, res_2010_m2,res_2010_m3,file="out/smpl/cces2010_girt_models.Rdata")
+    rm(res_2010_m1, res_2010_m2, res_2010_m3)
+    
+    
+# 3) CCES 12 ========================
+    
+    # # Script
+    # cat("\n Estimaing Model for CCES 2012 \n")
+    # 
+    # # Load Data
+    # load("in/cces2012_rollvote.Rdata")
+    # 
+    # # Legislator Data
+    # rvs <- paste("rv",c(1:3,5:10),sep="")
+    # ld <- as.matrix(rbind(sen112[,rvs],hou112[,rvs]))
+    # 
+    # # Respondent Data
+    # resp <- cces2012[,grep("rv|polint_news|pid",colnames(cces2012))]
+    # s <- apply(resp[,grep("polint_news|pid",colnames(resp))],1,function(x) !any(is.na(x)))
+    # resp_subset <- resp[s,]
+    # d <-  resp_subset[sample(1:nrow(resp_subset),2000),]
+    # rd <- as.matrix(d[,1:10])
+    # 
+    # # Missing Values
+    # d %>% 
+    #   mutate(interest = ifelse(polint_news==4,1,0),
+    #          partisan = ifelse(pid %in% c(1,2,6,7),1,0)
+    #   ) %>% 
+    #   group_by(interest,partisan) %>%
+    #   gather(rv,val,-interest,-partisan) %>%
+    #   summarise(mean(is.na(val))) 
+    # 
+    # # Covariates
+    # interest <- ifelse(d[,"polint_news"] ==4,1,0)  # Exposure to public news
+    # partisan <- ifelse(d[,"pid"] %in% c(1,2,6,7),1,0) # Party identification
+    # democrat <- ifelse(d[,"pid"] %in% c(1,2),1,0) # Democrats Party identification
+    # republican <- ifelse(d[,"pid"] %in% c(6,7),1,0) # Republican Party identification
+    # 
+    # # Estimating Model
+    # cat("\n First Model \n")
+    # Z <- model.matrix(~ partisan + interest)
+    # res_2012_m1 <- MCMCirtG(Yl = ld,Yc = rd, X = Z,
+    #                         burnin=Nburin,gibbs = Niter,thin = Nthin,
+    #                         chains=Nchains,
+    #                         prior_var_gamma = 100, proposal_var = 0.009)
+    # 
+    # 
+    # # Estimating Model
+    # cat("\n Second Model \n")
+    # Z <- model.matrix(~ partisan*interest)
+    # res_2012_m2 <- MCMCirtG(Yl = ld,Yc = rd, X = Z,
+    #                         burnin=Nburin,gibbs = Niter,thin = Nthin,
+    #                         chains=Nchains,
+    #                         prior_var_gamma = 100, proposal_var = 0.009)
+    # 
+    # 
+    # # Estimating Model
+    # cat("\n Third Model \n")
+    # Z <- model.matrix(~ democrat + republican + interest + interest:democrat +interest:republican)
+    # res_2012_m3 <- MCMCirtG(Yl = ld,Yc = rd, X = Z,
+    #                         burnin=Nburin,gibbs = Niter,thin = Nthin,
+    #                         chains=Nchains,
+    #                         prior_var_gamma = 100, proposal_var = 0.009)
+    # 
+    # # Save Results
+    # save(res_2012_m1, res_2012_m2,res_2012_m3,file="out/smpl/cces2012_girt_models.Rdata")
+    # rm(res_2012_m1, res_2012_m2, res_2012_m3)
+
+# Post-Estimation =========
+  
+  # Load 
+    load("out/smpl/cces2008_girt_models.Rdata")
+    load("out/smpl/cces2010_girt_models.Rdata")
+#    load("out/smpl/cces2012_girt_models.Rdata")
+    
+    rsl <- list(
+                res_2008_m1,res_2008_m2,res_2008_m3,
+                res_2010_m1,res_2010_m2,res_2010_m3,
+               # res_2012_m1,res_2012_m2,res_2012_m3
+                )
+    
+  # Rate of accepatance (a bit too low)
+    sapply(rsl,"[[","accept_rate")
+
+  # Convergence of gamma  
+    
+    # Trace plots
+    for(i in 1:length(rsl)){
+      print(plot_trace(rsl[[i]])  + theme_bw()  )
+    }
+
+    # Gelman-Rubin (all below 1.1)
+    lapply(rsl, function(r) apply(r$gamma,2, gelman.rubin))
+    
+    
+  # Compare estimates of discrimination
+    load("out/smpl/res_cces08_scaling.Rdata")
+    load("out/smpl/res_cces10_scaling.Rdata")
+ #   load("out/smpl/res_cces12_scaling.Rdata")
+    
+    # CCES 08
+    est_girt_08 <- apply(combine_chains(post_est_rotate(res_2008_m1))$beta,
+          2,mean)
+    est_irt_leg_08 <-  leg_08$betabar[,1]
+    cor(est_girt_08,est_irt_leg_08)
+    
+    # CCES 10
+    est_girt_10 <- apply(combine_chains(post_est_rotate(res_2010_m1))$beta,
+                         2,mean)
+    est_irt_leg_10 <-  leg_10$betabar[,1]
+    cor(est_girt_10,est_irt_leg_10)
+        
+    # CCES 12
+    # est_girt_12 <- apply(combine_chains(post_est_rotate(res_2012_m1))$beta,
+    #                      2,mean)
+    # est_irt_leg_12 <-  leg_12$betabar[,1]
+    # cor(est_girt_12,est_irt_leg_12)
+    
+  # Time Track
+  end.time <- Sys.time()
+  time.taken <- end.time - start.time
+  print(time.taken)
+
